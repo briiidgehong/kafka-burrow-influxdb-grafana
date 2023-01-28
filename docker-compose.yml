@@ -13,11 +13,12 @@ services:
       - "2181:2181"
 
   kafka:
-    image: confluentinc/cp-kafka:6.1.9
+    image: confluentinc/cp-kafka:latest
     depends_on:
       - zookeeper
     ports:
       - "9092:9092"
+      - "29092:29092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
@@ -41,6 +42,7 @@ services:
             urls: []
     ports:
       - 8080:8080
+    restart: always
 
   burrow:
     image: solsson/burrow:latest
