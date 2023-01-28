@@ -13,7 +13,7 @@ services:
       - "2181:2181"
 
   kafka:
-    image: confluentinc/cp-kafka:latest
+    image: confluentinc/cp-kafka:6.1.9
     depends_on:
       - zookeeper
     ports:
@@ -45,7 +45,7 @@ services:
   burrow:
     image: solsson/burrow:latest
     volumes:
-      - ./config:/etc/burrow
+      - ./config/burrow.toml:/etc/burrow/burrow.toml:ro
       - burrow_data:/var/tmp/burrow
     ports:
       - 8000:8000
@@ -63,45 +63,44 @@ services:
     ports:
       - "80:80"
     restart: always
+  # telegraf:
+  #   image: telegraf:1.18-alpine
+  #   volumes:
+  #     - ./config/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+  #   depends_on:
+  #     - influxdb
+  #   links:
+  #     - influxdb
+  #   ports:
+  #     - '8125:8125'
+  #   restart: always
 
-  telegraf:
-    image: telegraf:1.18-alpine
-    volumes:
-      - ./config/telegraf.conf:/etc/telegraf/telegraf.conf:ro
-    depends_on:
-      - influxdb
-    links:
-      - influxdb
-    ports:
-      - '8125:8125/udp'
+  # influxdb:
+  #   image: influxdb:1.8-alpine
+  #   environment:
+  #     - INFLUXDB_DB=influx
+  #     - INFLUXDB_ADMIN_USER=admin1234
+  #     - INFLUXDB_ADMIN_PASSWORD=admin1234
+  #   ports:
+  #     - "8086:8086"
+  #   volumes:
+  #     - influxdb_data:/var/lib/influxdb2
+  #     - influxdb_config:/etc/influxdb2
+  #   restart: always
 
-  influxdb:
-    image: influxdb:2.4
-    environment:
-      DOCKER_DB_NAME: influx
-      DOCKER_INFLUXDB_INIT_USERNAME: admin1234
-      DOCKER_INFLUXDB_INIT_PASSWORD: admin1234
-      DOCKER_INFLUXDB_INIT_ORG: my-org
-      DOCKER_INFLUXDB_INIT_BUCKET: my-bucket
-    ports:
-      - "8086:8086"
-    volumes:
-      - influxdb_data:/var/lib/influxdb2
-      - influxdb_config:/etc/influxdb2
-
-  grafana:
-    image: grafana/grafana:8.0.2
-    depends_on:
-      - influxdb
-    links:
-      - influxdb
-    environment:
-      GF_SECURITY_ADMIN_USER: admin1234
-      GF_SECURITY_ADMIN_PASSWORD: admin1234
-    ports:
-      - '3000:3000'
-    volumes:
-      - grafana_data:/var/lib/grafana
+  # grafana:
+  #   image: grafana/grafana:8.0.2
+  #   depends_on:
+  #     - influxdb
+  #   links:
+  #     - influxdb
+  #   environment:
+  #     GF_SECURITY_ADMIN_USER: admin1234
+  #     GF_SECURITY_ADMIN_PASSWORD: admin1234
+  #   ports:
+  #     - '3000:3000'
+  #   volumes:
+  #     - grafana_data:/var/lib/grafana
 
 volumes:
   burrow_data: {}
