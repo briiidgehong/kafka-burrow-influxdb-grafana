@@ -1,49 +1,6 @@
 version: '2'
 
 services:
-  zookeeper:
-    image: confluentinc/cp-zookeeper:latest
-    environment:
-      ZOOKEEPER_SERVER_ID: 1
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-      ZOOKEEPER_INIT_LIMIT: 5
-      ZOOKEEPER_SYNC_LIMIT: 2
-    ports:
-      - "2181:2181"
-
-  kafka:
-    image: confluentinc/cp-kafka:latest
-    depends_on:
-      - zookeeper
-    ports:
-      - "9092:9092"
-      - "29092:29092"
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-
-  console:
-    image: docker.redpanda.com/vectorized/console:v2.1.1
-    entrypoint: /bin/sh
-    command: -c "echo \"$$CONSOLE_CONFIG_FILE\" > /tmp/config.yml; /app/console"
-    environment:
-      CONFIG_FILEPATH: /tmp/config.yml
-      CONSOLE_CONFIG_FILE: |
-        kafka:
-          brokers: ["kafka:9092"]
-          schemaRegistry:
-            enabled: false
-            urls: []
-    ports:
-      - 8080:8080
-    restart: always
-
   burrow:
     image: solsson/burrow:latest
     volumes:
@@ -51,9 +8,6 @@ services:
       - burrow_data:/var/tmp/burrow
     ports:
       - 8000:8000
-    depends_on:
-      - zookeeper
-      - kafka
     restart: always
 
   burrow-dashboard:
@@ -90,22 +44,6 @@ services:
       - influxdb_data:/var/lib/influxdb2
       - influxdb_config:/etc/influxdb2
     restart: always
-
-  # influxdb:
-  #   image: influxdb:2.4.0
-  #   environment:
-  #     - DOCKER_INFLUXDB_INIT_MODE=setup
-  #     - DOCKER_INFLUXDB_INIT_USERNAME=admin1234
-  #     - DOCKER_INFLUXDB_INIT_PASSWORD=admin1234
-  #     - DOCKER_INFLUXDB_INIT_ORG=my-org
-  #     - DOCKER_INFLUXDB_INIT_BUCKET=my-bucket
-  #   ports:
-  #     - "8086:8086"
-  #   volumes:
-  #     - influxdb_data:/var/lib/influxdb2
-  #     - influxdb_config:/etc/influxdb2
-  #   restart: always
-
   grafana:
     image: grafana/grafana:8.0.2
     depends_on:
