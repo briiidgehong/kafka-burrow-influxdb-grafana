@@ -2,7 +2,7 @@ version: '2'
 
 services:
   burrow:
-    build: .
+    build: ./burrow/
     volumes:
       - ./config/burrow.toml:/etc/burrow/burrow.toml:ro
     ports:
