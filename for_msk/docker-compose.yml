@@ -2,62 +2,61 @@ version: '2'
 
 services:
   burrow:
-    image: solsson/burrow:latest
+    build: .
     volumes:
       - ./config/burrow.toml:/etc/burrow/burrow.toml:ro
     ports:
       - 8000:8000
     restart: always
-  # burrow-dashboard:
-  #   image: joway/burrow-dashboard:latest
-  #   depends_on:
-  #     - burrow
-  #   environment:
-  #     BURROW_BACKEND: 'http://burrow:8000'
-  #   ports:
-  #     - "80:80"
-  #   restart: always
 
-  # telegraf:
-  #   image: telegraf:1.18-alpine
-  #   volumes:
-  #     - ./config/telegraf.conf:/etc/telegraf/telegraf.conf:ro
-  #   depends_on:
-  #     - influxdb
-  #   links:
-  #     - influxdb
-  #   ports:
-  #     - '8125:8125'
-  #   restart: always
+  burrow-dashboard:
+    image: joway/burrow-dashboard:latest
+    depends_on:
+      - burrow
+    environment:
+      BURROW_BACKEND: 'http://burrow:8000'
+    ports:
+      - "80:80"
+    restart: always
 
-  # influxdb:
-  #   image: influxdb:1.8-alpine
-  #   environment:
-  #     - INFLUXDB_DB=influx
-  #     - INFLUXDB_ADMIN_USER=admin1234
-  #     - INFLUXDB_ADMIN_PASSWORD=admin1234
-  #   ports:
-  #     - "8086:8086"
-  #   volumes:
-  #     - influxdb_data:/var/lib/influxdb2
-  #     - influxdb_config:/etc/influxdb2
-  #   restart: always
-  # grafana:
-  #   image: grafana/grafana:8.0.2
-  #   depends_on:
-  #     - influxdb
-  #   links:
-  #     - influxdb
-  #   environment:
-  #     GF_SECURITY_ADMIN_USER: admin1234
-  #     GF_SECURITY_ADMIN_PASSWORD: admin1234
-  #   ports:
-  #     - '3000:3000'
-  #   volumes:
-  #     - grafana_data:/var/lib/grafana
+  telegraf:
+    image: telegraf:1.18-alpine
+    volumes:
+      - ./config/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    depends_on:
+      - burrow
+      - influxdb
+    ports:
+      - '8125:8125'
+    restart: always
 
-  # volumes:
-  #   burrow_data: {}
-  #   grafana_data: {}
-  #   influxdb_data: {}
-  #   influxdb_config: {}
+  influxdb:
+    image: influxdb:1.5.0
+    environment:
+      - INFLUXDB_DB=influx
+      - INFLUXDB_ADMIN_USER=admin1234
+      - INFLUXDB_ADMIN_PASSWORD=admin1234
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+      - influxdb_config:/etc/influxdb2
+    restart: always
+
+  grafana:
+    image: grafana/grafana:7.3.4
+    depends_on:
+      - influxdb
+    environment:
+      GF_SECURITY_ADMIN_USER: admin1234
+      GF_SECURITY_ADMIN_PASSWORD: admin1234
+    ports:
+      - '3000:3000'
+    volumes:
+      - grafana_data:/var/lib/grafana
+    restart: always
+volumes:
+  burrow_data: {}
+  grafana_data: {}
+  influxdb_data: {}
+  influxdb_config: {}
